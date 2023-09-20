@@ -8,7 +8,7 @@ const Home = () => {
     const navigate = useNavigate();
 
     const logout = () => {
-        localStorage.clear()
+        localStorage.removeItem('adminToken')
         navigate('/admin')
     }
 
@@ -21,34 +21,40 @@ const Home = () => {
     );
 
     const deleteUser = async (id) => {
-        try{
-            if(window.confirm("Are you sure you want to delete this user?")){
+        try {
+            if (window.confirm("Are you sure you want to delete this user?")) {
                 const response = await axiosInstance.delete(`/admin/adminDeleteUser/${id}`, id)
-                if(response.data.email){
+                if (response.data.email) {
                     setUsers(prevUsers => prevUsers.filter(user => user._id !== id))
                 } else {
                     alert(response.data.message);
                 }
             }
-        }catch(err){
+        } catch (err) {
             console.log(err);
         }
     }
 
-    const updateUser = async(id) =>{
-        try{
+    const updateUser = async (id) => {
+        try {
             navigate(`/editUser/${id}`, id);
-        }catch(err){
+        } catch (err) {
             console.log(err);
         }
     }
 
     useEffect(() => {
-        axiosInstance.get('/admin/loadDashboard').then((response) => {
-            setUsers(response.data)
-        }).catch(err => {
-            console.log(err)
-        })
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            navigate('/admin');
+        } else {
+
+            axiosInstance.get('/admin/loadDashboard').then((response) => {
+                setUsers(response.data)
+            }).catch(err => {
+                console.log(err)
+            })
+        }
     }, []);
     return (
         <>
@@ -74,7 +80,7 @@ const Home = () => {
 
                                             <button onClick={addUser} className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out">
                                                 Add User
-                                            </button>   
+                                            </button>
                                         </div>
                                         <table className="min-w-full mb-0">
                                             <thead className="border-b bg-gray-50 rounded-t-lg text-left">
@@ -92,7 +98,7 @@ const Home = () => {
                                                             <div className="flex flex-row items-center">
                                                                 <img
                                                                     className="rounded-full w-12"
-                                                                    src="https://mdbootstrap.com/img/new/avatars/9.jpg"
+                                                                    src={`http://localhost:5000/${user?.image}`}
                                                                     alt="Avatar"
                                                                 />
                                                                 <div className="ml-4">

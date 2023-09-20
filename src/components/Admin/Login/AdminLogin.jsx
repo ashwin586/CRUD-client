@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import axiosInstance from '../../../services/axios/axios'
 import {useNavigate} from  'react-router-dom'
 
@@ -14,7 +14,7 @@ const AdminLogin = () => {
             const response = await axiosInstance.post('/admin/adminLogin', {email,password})
             console.log(response.data)
             if(response.data && response.data.adminData){
-                localStorage.setItem('token', response.data.adminToken)
+                localStorage.setItem('adminToken', response.data.adminToken)
                 navigate('/dashboard');
             } else {
                 alert(response.data.message);
@@ -23,6 +23,15 @@ const AdminLogin = () => {
             console.log(err);
         }
     }
+
+    useEffect(() =>{
+        const token = localStorage.getItem('adminToken');
+        if(token){
+            navigate('/dashboard')
+        }else {
+            navigate('/admin');
+        }
+    },[])
 
     return (
         <>

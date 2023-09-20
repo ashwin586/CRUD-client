@@ -5,6 +5,7 @@ import axiosInstance from '../../../services/axios/axios';
 const UpdateUser = () => {
     const navigate = useNavigate();
     const { id } = useParams();
+    const [image, setImage] = useState(null);
     const [formData, setFormData] = useState()
     useEffect(() => {
         axiosInstance.get(`/admin/getUser/${id}`).then((response) => {
@@ -14,7 +15,8 @@ const UpdateUser = () => {
                 phoneNo: response.data.phoneNo || '',
                 email: response.data.email || '',
                 password: response.data.password || '',
-              });
+                image: response.data.image || null,
+            });
         }).catch(err => {
             console.log(err);
         })
@@ -23,7 +25,11 @@ const UpdateUser = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axiosInstance.put(`/admin/updateUser/${id}`, formData);
+            const response = await axiosInstance.put(`/updateUser/${id}`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
             if (response.status === 200) {
                 navigate('/userProfile');
             }
@@ -39,6 +45,12 @@ const UpdateUser = () => {
             [name]: value,
         }));
     };
+
+    const handleImageChange = (e) => {
+        const image = e.target.files[0];
+        setImage(image);
+        setFormData({ ...formData, image: image });
+    }
 
     return (
         <>
@@ -99,8 +111,24 @@ const UpdateUser = () => {
                                         </div>
                                     </div>
                                     <div className="flex -mx-3">
+                                        <div className="w-full px-3 mb-12">
+                                            <label htmlFor="fileInput" className="custom-file-upload">
+                                                {image ? "Choose another photo" : "Select a profile Photo"}
+                                            </label>
+                                            <input
+                                                type="file"
+                                                name="image"
+                                                id="fileInput"
+                                                onChange={handleImageChange}
+                                            />
+                                            <div>
+                                                Selected File: {formData?.image ? <img src={`http://localhost:5000/${formData?.image}`} alt={formData?.image} className="w-32 h-32 mx-auto rounded-full dark:bg-gray-500 aspect-square" /> : 'No file selected'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex -mx-3">
                                         <div className="w-full px-3 mb-5">
-                                            <button className="block w-full max-w-xs mx-auto bg-indigo-500 hover:bg-indigo-700 focus:bg-indigo-700 text-white rounded-lg px-3 py-3 font-semibold">REGISTER NOW</button>
+                                            <button className="block w-full max-w-xs mx-auto bg-indigo-500 hover:bg-indigo-700 focus:bg-indigo-700 text-white rounded-lg px-3 py-3 font-semibold">EDIT USER</button>
                                         </div>
                                     </div>
                                 </form>
